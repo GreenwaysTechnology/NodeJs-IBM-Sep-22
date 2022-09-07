@@ -1,0 +1,109 @@
+				Modularity
+
+
+Javascript modularity:
+
+
+Modularity:
+..........
+
+In java Modularity , is presented via "Packages"
+
+Package organize the code  logically.
+
+Customer.java
+
+package com.ibm.cms
+
+public class Customer{}
+
+Java organizes code folders and files Physically.
+
+d:/javaapps/src/
+    com/ibm/cms/Customer.java
+
+
+What about javascript Modularity?
+
+ Javascript is file based modularity physically
+ but logically there is no such modularity at language level.
+
+collection of variable declarations and function.
+
+Once js started growing in large scale, dev struck to organize code.
+
+2000, Smart developers started thinking about how to modualrize js code.
+ 
+
+Module design patterns came.
+
+1.Namespace design pattern : 2000 : jquery
+2.AMD -Async Module Defintion : dojo
+---------------------------------------------------------
+3.CJS - Common JS =  namespace + amd
+4.ES 6 Module design pattern  = amd + cjs
+------------------------------------------------------------
+5.System = AMD = CJS + ES 6
+6.UMD = NAMESPACE + AMD + CJS = ES 6
+.....................................................................................
+				Common js
+.....................................................................................
+
+keywords:
+Code Sharing:
+
+code could be variable declaration,function declaration,class declaration.
+
+exports
+module.exports
+
+//Linking files and get shared code.
+require()
+
+src/mylib.js
+//variable can hold any literal
+//cjs packs the code within object if you use exports keyword
+//strings 
+exports.firstName = 'Subramanian'
+exports.lastName = 'Murugan'
+exports.age = 18
+exports.status = true
+exports.skill = ['Java', 'Js']
+exports.address = {
+    city: 'Coimbatore'
+}
+src/index.js
+//main file 
+const info = require('./mylib')
+console.log(info)
+
+console.log(`Name ${info.firstName} ${info.lastName}`)
+console.log(`Age ${info.age}`)
+console.log(`Status ${info.status}`)
+.....................................................................................
+			How to share code via Subfolders
+
+
+src/mock-data/user.js
+exports.user = {
+    id: 1,
+    name: 'Subramanian',
+    address: {
+        city: 'Coimbatore'
+    }
+}
+
+src/index.js
+const user = require('./mock-data/user')
+
+console.log(user)
+......................*************................................................
+
+
+
+
+
+
+
+
+
