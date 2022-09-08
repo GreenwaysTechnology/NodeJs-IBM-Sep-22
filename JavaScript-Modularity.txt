@@ -97,7 +97,184 @@ src/index.js
 const user = require('./mock-data/user')
 
 console.log(user)
-......................*************................................................
+......................************************.......................................
+
+exports will pack the code into an object , then it will be returned to another file where we are invoking.
+
+behind the scene the exports is variable holding empty object by default.
+
+let exports = {}
+
+
+exports.id = 1
+{id:1}
+exports.name ='Subramanian'
+{id:1,name:'Subramanian' user:{}}
+
+module.exports:
+
+  Which does not pack the code into object,rather will return as it is.
+
+const id=1
+
+module.exports = id
+
+module.exports = variable / func/array/object/class
+
+
+src/util/StringUtil.js
+class StringUtil {
+    constructor() {
+
+    }
+    captalize() {
+        return 'Capitalize api'
+    }
+}
+//how to share this class outside
+// module.exports = StringUtil;
+
+//how to return object 
+module.exports = new StringUtil()
+
+src/index.js
+const StringUtil = require('./util/StringUtil')
+
+console.log(StringUtil)
+// let strutil = new StringUtil()
+// console.log(strutil.captalize())
+console.log(StringUtil.captalize())
+
+
+src/mock-data/products.js
+//products
+// const products = [
+//     {
+//         id: 1,
+//         name: 'foo',
+//         price: 10.5
+//     }
+// ]
+// module.exports = products
+module.exports = [
+    {
+        id: 1,
+        name: 'foo',
+        price: 10.5
+    }
+]
+
+index.js
+const Products = require('./mock-data/products')
+
+console.log(Products)
+.....................................................................................
+				ES 6 modules
+....................................................................................
+
+ES 6 modules are enchanced version of CJS.
+ES 6 modules are introduced in ES 6 language spec.
+
+ES 6 modules are not directly supported by browser and node, but latest version of browsers and node supports with some configuration.
+
+How to share code?
+ export,export default
+
+How to import code?
+ import
+
+src/util/myutil.js
+//share string,number,booleans,objects,arrays
+
+export const name = 'Subramanian'
+export const age = 18
+export const status = true
+export const skills = ['java', 'js', 'react', 'microservices']
+export const calculate = () => 100
+export const address = {
+    city: 'Coimbatore'
+}
+
+src/index.js
+import { name, age, status, skills, calculate, address } from './util/myutil.js'
+
+console.log(name,age,status,skills,calculate(),address)
+......................................................................................
+			 ES 6 Modules Patterns
+
+src/util/myutil.js
+
+//share string,number,booleans,objects,arrays
+    export const name = 'Subramanian'
+    export const age = 18
+    export const status = true
+    export const skills = ['java', 'js', 'react', 'microservices']
+    export const calculate = () => 100
+    export const address = {
+        city: 'Coimbatore'
+ }
+src/index.js
+import { name, age, status, skills, calculate, address } from './util/myutil.js'
+
+console.log(name,age,status,skills,calculate(),address)
+...............
+
+export default:
+
+src/util/CustomerService.js
+
+// export  default class CustomerService {
+
+// }
+
+class CustomerService {
+    constructor() {
+        console.log('CustomerService')
+    }
+    list() {
+        return [{
+            id: 1,
+            name: 'A'
+        }]
+    }
+}
+
+export default CustomerService;
+
+index.js
+import CustomerService from "./util/CustomerService.js";
+
+let custService = new CustomerService();
+console.log(custService.list())
+
+Old node js does not support es 6 modules directly, modern node supports es 6 module via flag "type":"module"
+
+package.json
+{
+  "name": "es6moduleapps",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

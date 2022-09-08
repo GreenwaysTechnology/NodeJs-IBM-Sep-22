@@ -1,0 +1,121 @@
+Node.js:
+.......
+
+What is Node.js?
+
+ Node.js is a platform to run js code outside web browser.
+ Platform means collection of tools,libs/apis,runtime in order to build end to end apps
+
+Why Node.js Was Created?
+
+ Before Node.js, There was no arch for building application particullar networkbased apps using nonblocking /async programming model.
+
+What is Blocking and What is Non Blocking(Async) Programming Model?
+
+Runtime:
+  The program which runs the code for eg : jvm
+Every Runtime is a process.
+Each has sub process called "Thread".
+Thread executes code parallel, - multi task.
+.....................................................................................
+				 File Descriptors
+.....................................................................................
+
+1.File descriptors is simple array(ds)
+2.File descriptor is associated with every process on os- if you run more than one process - will have more file descriptor table
+
+ jvm---------> fd 
+ browser-----> fd
+ notepad ---> fd
+
+fd is created when process is created, destroyed when process is destroyed...
+
+FD arch:
+Integer value	Name	<unistd.h> symbolic constant[1]	<stdio.h> file stream[2]
+0	Standard input	STDIN_FILENO	stdin
+1	Standard output	STDOUT_FILENO	stdout
+2	Standard error	STDERR_FILENO	stderr
+
+These values are standard which cant be altered.
+
+Lets assume if you write a program to read data from the harddrive.
+
+Process:
+1.we use language high level api to start reading file from the disk
+  java:
+   FileInputStream fins= newFileInputStream("c:/tmp/version.txt")
+   fins.read()
+
+ java uses read api--------|jvm----will call c api(os api)---->kernal--fd
+
+2.we use language high level api to start reading data from the network(Remote computer)
+  java:
+ java uses readSocket------i--------|jvm----will call c api(os api)---->kernal--fd
+
+..
+
+Network io and web server:
+
+Any web server if you take, it works based on io model- socket-network io.
+
+Traditional web server, for every client request is  handled inside server by a thread.
+
+        "Request Per Thread model"
+
+....................................................................................
+Drawbacks of Request Per Thread Model.
+   1000 req = 1000 thread
+   1 million = 1 million threads
+
+
+ c10k Problem
+The C10k problem is the problem of optimizing network sockets to handle a large number of clients at the same time.[1] The name C10k is a numeronym for concurrently handling ten thousand connections
+
+Solution: 
+ =>How to reduce no of threads.
+
+Evils of Thread:
+ ->Thread is subject to memory.
+ ->Thread is subject to cpu, cpu need to do lot of ctx switch.
+
+Solution:
+ Having  a limited no of threads , at least one or two.
+
+Linux api to make non blocking io:
+
+1.select + read
+2.Poll
+3.Epoll
+
+EPoll:
+  It is a framework, introduced in linux to handle non blocking operations using event driven programming model.
+
+EPoll introduced a concept called "event loop"
+
+Event Loop:
+
+Any similar arch/technology available today like node.js?
+
+Java - with Netty
+Java with Vertx
+Java with Quarkus
+
+What type apps we can build using Node.js?
+
+You can build  concurrent non blocking network io apps....
+.....................................................................................
+				Node.js Programming area
+
+1.Node REPL
+2.Node and js apis
+3.Node core apis
+4.Styles of writing async programming
+   ->Callback pattern
+   ->Promise Pattern
+    ->Promise with Async and await Pattern
+.........
+
+
+
+
+
