@@ -1247,5 +1247,442 @@ const writeStr = fs.createWriteStream(outputFileName, config);
 //pipe method is simplest method which wraps resume,pasuse,drain 
 readerStream.pipe(writeStr);
 .....................................................................................
+			Non Blocking Web Apps
+....................................................................................
+
+Node Js Provides HTTP Server,HttpApplication , is nonblocking.
+
+Unlike traditional webservers,node uses single event thread to handle concurrent requests.
+
+Http Module:
+The HTTP interfaces in Node.js are designed to support many features of the protocol which have been traditionally difficult to use. In particular, large, possibly chunk-encoded, messages. The interface is careful to never buffer entire requests or responses, so the user is able to stream data.
+
+HTTP modules objects:
+
+1.Server
+  Server object is used to implement http servers/web containers
+2.ServerResponse
+  Object is used to send data 
+3.ClientRequest
+   Request object is used to handle http client requests
+4.IncommingMessage
+   Represents message payloads.
+
+
+
+Note: all http implemnetation is streaming powered by default.
+
+Steps:
+
+1.create Server.
+2.request-response handling
+3.starting server
+
+const http = require('http')
+// console.log(http)
+
+//handles all client request
+const requestListener = (req, res) => {
+    res.write("Hello")
+    //close the stream
+    res.end()
+}
+const server = http.createServer(requestListener)
+
+//start the server
+server.listen(8080,()=>{
+    console.log('HTTP server is Running!!!')
+})
+
+.....................................................................................
+const { createServer } = require('http')
+
+//handles all client request
+const server = createServer((req, res) => {
+    res.write("Hello")
+    //close the stream
+    res.end()
+})
+
+//start the server
+server.listen(8080, () => {
+    console.log('HTTP server is Running!!!')
+})
+.....................................................................................
+			 Response Types
+....................................................................................
+
+plain/text
+application/json
+etc...
+
+const http = require('http')
+const TODOS = require('./mock-data/todos')
+
+const server = http.createServer((req, res) => {
+    //response as json 
+    res.writeHead(200, {
+        'Content-Type': 'application/json'
+    })
+    const todos = JSON.stringify(TODOS)
+    res.end(todos)
+
+})
+
+
+server.listen(8080, () => {
+    console.log(`Server is running on ${server.address().port}`)
+})
+
+...................................................................................
+   		  Handling biz logic in a separate layer
+....................................................................................
+
+const todos = require("../mock-data/todos")
+
+class TodoService {
+    constructor() {
+
+    }
+    //blocking api
+    // findAll() {
+    //     return JSON.stringify(todos)
+    // }
+    // findAll(callback) {
+    //     setTimeout(callback, 5000, todos)
+    // }
+    findAll() {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve, 5000, todos)
+        })
+    }
+}
+module.exports = new TodoService();
+.....
+
+Api layer:
+const http = require('http')
+const { findAll } = require('./services/Todo.service')
+
+const server = http.createServer(async (req, res) => {
+    //response as json 
+    // findAll(todos => {
+    //     res.writeHead(200, {
+    //         'Content-Type': 'application/json'
+    //     })
+    //     res.end(JSON.stringify(todos))
+    // })
+    res.writeHead(200, {
+        'Content-Type': 'application/json'
+    })
+    // findAll().then(todos => {
+    //     res.end(JSON.stringify(todos))
+    // }).catch(err => {
+    //     res.end(JSON.stringify({ err: err }))
+    // })
+    try {
+        const todos = await findAll()
+        res.end(JSON.stringify(todos))
+    }
+    catch (err) {
+        res.end(JSON.stringify({ err: err }))
+    }
+})
+
+
+server.listen(8080, () => {
+    console.log(`Server is running on ${server.address().port}`)
+})
+.....................................................................................
+			 How to read input
+
+const http = require('http')
+
+const server = http.createServer((req, res) => {
+    //how to read data from the client.
+    //attach listener on request object
+    let data = ''
+    req.on('data', chunk => {
+        data += chunk
+    });
+    req.on('end', () => {
+        let res = JSON.parse(data)
+        console.log(res)
+    })
+    res.end('hello')
+});
+
+
+server.listen(8080, () => {
+    console.log(`Server is running on ${server.address().port}`)
+})
+................................................................................
+			 File as response
+.................................................................................
+const http = require('http')
+const fs = require('fs')
+const path = require('path')
+
+const server = http.createServer((req, res) => {
+    const filePath = path.join(__dirname, 'assets/info.txt')
+    //fileSize
+    const fileSize = fs.statSync(filePath)
+    res.writeHead(200, {
+        'Content-Type': 'text/plain',
+        'Content-Length': fileSize.size
+    })
+    let readStream = fs.createReadStream(filePath)
+    //write into http response stream
+    readStream.pipe(res)
+
+})
+
+server.listen(8080, () => {
+    console.log(`Server is running at ${server.address().port}`)
+})
+.................................................................................
+			Server Events
+..................................................................................
+request event:
+ we can attach request event , which is used to listen any incoming request information.
+//how to listen for server events
+
+const http= require('http')
+
+const server = http.createServer((req, res) => {
+    //how to read data from the client.
+    //attach listener on request object
+    let data = ''
+    req.on('data', chunk => {
+        data += chunk
+    });
+    req.on('end', () => {
+        let res = JSON.parse(data)
+        console.log(res)
+    })
+    res.end('hello')
+});
+
+//server event listeners
+server.on('request',(req,res)=>{
+    console.log(req.headers)
+    console.log(req.url,req.method)
+    
+})
+
+server.listen(8080, () => {
+    console.log(`Server is running on ${server.address().port}`)
+})
+..................................................................................
+			TCP server and client application
+...................................................................................
+
+There is a module called "net module".
+
+The node:net module provides an asynchronous network API for creating stream-based TCP or IPC servers (net.createServer()) and clients (net.createConnection()).
+
+
+
+Server:
+const net = require('net')
+
+//socket tcp server 
+const server = net.createServer(connection => {
+    console.log('TCP server is connected')
+    //events
+    connection.on('end', () => {
+        console.log('client is disconnected')
+    })
+    connection.write('Hello,TCP Server Message')
+    connection.pipe(connection)
+})
+//server listener
+server.listen(9090, () => {
+    console.log('TCP server is listening')
+})
+
+Socket Client:
+const net = require('net')
+const client = net.connect({ port: 9090 }, () => {
+    console.log('TCP client connected with Server')
+});
+client.on('data', data => {
+    console.log(data.toString())
+    client.end();
+})
+client.on('end', () => {
+    console.log('Disconnected from the server')
+})
+
+How to run the app
+
+>node src/socketserver.js
+
+>node src/socketclient.js
+.....................................................................................
+			  NPM - Node package Manager
+
+
+What is npm?
+ npm is the world's largest software registry.
+ open source developers from every part of the world use npm sto share and borrow packages.
+ many organizations use npm to manage private development as well.
+
+In js, you might have created lib/framework/utility, if you want to share to other developers in the world or within your organization or your team - npm helps.
+
+NPM consists of three components
+1.the website - used to discover packages, setup profiles and manage other aspects of npm
+
+2.CLI runs from the terminal, and how most developers interact with npm.
+
+3.registry - it is  large public database of js software and the meta information surrounding it.
+
+core concepts in npm:
+
+1.package
+2.module
+
+What is package?
+   A package is a file or directory that is described by a package.json file
+   A package must contain package.json file in order to be published to the npm    registry
+
+Package format:
+a.A folder containing a program described by a package.json.
+b.A gizpped tarball containing "a"
+c.A URL that resolves "a"
+
+Modules:
+ A module is any file or directory in the "node_modules" directory that can be loaded by the node.js require function
+ A javascript file
+
+modules need not have "package.json" file
+
+eg:
+ const http =require('http')
+
+ here the variable called http referes the 'http' module.
+
+....................................................................................
+				How to create npm package
+
+Steps:
+
+1.create folder
+>mkdir mynpm-apps
+>cd mynpm-apps
+>mkdir src
+
+2.create package.json
+
+Before create you have to ensure that npm has been installed.
+
+npm init <initalizer>
+
+npm init
+This utility will walk you through creating a package.json file.
+It only covers the most common items, and tries to guess sensible defaults.
+
+See `npm help init` for definitive documentation on these fields
+and exactly what they do.
+
+Use `npm install <pkg>` afterwards to install a package and
+save it as a dependency in the package.json file.
+
+Press ^C at any time to quit.
+package name: (mynpm-apps)
+version: (1.0.0)
+description:
+entry point: (index.js)
+test command:
+git repository:
+keywords:
+author:
+license: (ISC)
+
+package.json
+{
+  "name": "mynpm-apps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
+...................................................................................
+>npm init --yes
+
+Wrote to E:\session\IBM\2022\sep\nodejs\mynpm-apps\package.json:
+
+{
+  "name": "mynpm-apps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+.....
+
+name:
+ This is used to publish package into registry
+
+version:
+   if you publish package into registry, which is differentiated by "version"
+
+"1.0.0" - version no is based on the concept called "SEM Ver" concept- Semantic versioning.
+ Major.minor.patch
+
+main:
+  It is main file used /entry file in the package , generally it would index.js or main.js
+
+description:
+  It explains the nature of packages- what is this packge.
+
+Keywords:
+  Used to discover your packages using npm search command
+
+author:
+  Who is author of this package
+
+license:
+  You should specify a license for your package so that people know how they are permitted to use it.
+................
+
+node_modules:
+  it is folder , used to install any node packages, the node programm always looks up the packages from the current folder.
+....................................................................................
+				Node Packages
+
+How to install node packages which was distributed by others?
+
+npm install [<package-name>]
+
+You can find out the packages from npm registry server
+
+npm install | i  lodash --options
+
+npm i lodash
+
+src/index.js
+
+//How to use lodash 
+var _ = require('lodash');
+console.log(_)
+...........................&&&&&&&&&&&&&&&&..........................................
+
+
+
+
+
+
+
+
 
 
