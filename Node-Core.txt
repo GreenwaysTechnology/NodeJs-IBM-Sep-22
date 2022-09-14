@@ -1677,6 +1677,431 @@ var _ = require('lodash');
 console.log(_)
 ...........................&&&&&&&&&&&&&&&&..........................................
 
+Options:
+
+ --save
+ --save-dev
+  -g
+
+Application mode
+
+1.dev
+2.test
+3.prod
+
+dev : any dependency required for development only
+  --save-dev
+test : 
+   any dependency required for development only - test
+   --save-dev
+prod:
+  dependency used in dev and production... 
+  --save
+"dependencies": {
+    "lodash": "^4.17.21"
+  }
+ 
+Libs required for dev and test
+tools
+   -compilers,webservers
+   -testing libs and framworks 
+
+eg:
+  mocha - test runner is used for running test case
+  chai.js -test assertion lib used for writing test cases
+
+ "devDependencies": {
+    "mocha": "^10.0.0"
+  }
+....................................................................................
+	  How to install only production dependencies during build process
+....................................................................................
+if you want to use app in production mode, you have exclude the dependencies.
+
+npm i /npm install - install dev and production packages...
+ --->it scans package.json file which install everything(dev + prod)
+
+npm install --production
+  it scans package.json which install only from dependencies
+.....................................................................................
+			How to remove /uninstall package
+
+npm uninstall mocha --save-dev
+,,,,,,,,,,,,,........................................................................
+			Global Package
+
+Global package is installed not inside project, installed globally.
+Global packages are generally tools to create projects,webservers,test runtime like so.
+npm install mocha -g
+.....................................................................................
+		     java script automation
+...................................................................................
+ "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+"key"  => the command Name
+"value" => task to be executed
+
+commands:
+   npm offers lot of built in script command
+ 
+test,start,pack,publsh,install,stop,version...
+
+How to run?
+  npm commandName
+  npm test
+  npm start
+  npm stop
+
+
+node programm can be executed in two ways.
+
+1.node src/index.js
+2.npm start
+
+{
+  "name": "mynpm-apps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start" : "node src/app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}
+....................................................................................
+			 Custom Commands
+...................................................................................
+
+if you want to run custom commands
+
+"scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start" : "node src/app.js",
+    "demo" : "node src/app.js"
+  },
+npm run commandName
+
+npm run demo
+....................................................................................
+			  Global packages and scripts
+...................................................................................
+....................................................................................
+	        Common Problems in Gobal Modules and how to
+			 Solve using  scripts
+
+
+-Global modules are used for tooling purpose like compilers,build tools,servers,test runners(mocha).
+
+Globals has some issues:
+
+1.version and compablity issue for new projects
+1.version and compablity issue for new projects
+
+
+Steps:
+
+1.npm uninstall mocha -g
+
+2.>mocha --help
+'mocha' is not recognized as an internal or external command,
+operable program or batch file.
+
+3.install mocha locally
+
+ npm install mocha --save-dev
+
+4.>mocha
+'mocha' is not recognized as an internal or external command,
+operable program or batch file.
+
+Why i am getting error?
+  because mocha is command, we cant run directly.
+
+5.solution is run via scripts
+
+package.json
+"scripts": {
+    "test": "mocha",
+    "start": "node src/index.js",
+    "subu": "node src/index.js"
+  }
+
+npm test
+
+> nodeapps@1.0.0 test C:\session\ibm\2021\june\nodemicroservices\nodeapps
+> mocha
+
+
+
+  Array
+    #indexOf()
+      √ should return -1 when the value is not present
+
+
+  1 passing (6ms)
+....................................................................................
+			How to execute multiple scripts
+
+we may want to coimbine some of scripts and run them together
+
+
+  "scripts": {
+     "hello": "node src/hello.js",
+    "hai": "node src/hai.js",
+    "greet": "npm run hello && npm run hai"
+  },
+.....................................................................................	
+			Web Frameworks for Node.js
+				Express.js
+................................................................................
+
+What is express.js
+  Express.js is the first web framework built for node js and built by node js core team.
+  Express.js is wrapper around core http module.
+  Express is abstraction for creating Web Applications for node http core module.
+
+Express can be used to small to medium scale apps only.
+
+Types of apps we can build using express.j
+
+1.Dynamic web apps
+2.Rest apis
+
+
+How to write express apps?
+
+1.using vannila node project and install express framework
+2.using express generator - tool used to create express apps.
+
+express core concepts:
+ In express everything object
+
+express - function
+  used to create express objects
+
+1.Application
+ 
+2.Request
+3.Response
+4.Router
+
+1.Application Object
+  =>It represents the whole express app
+  =>It is container object which contains other objects
+  =>It is created by calling express function
+  =>Per Application only one app instance
+
+Application Object
+  =>You can expose the global end points
+  =>You configure middlewares
+  =>you can render views
+  =>you can register template engines
+  =>You can start web container...
+
+Simple express app:
+const express = require('express')
+
+// console.log(express)
+const app = express()
+
+// console.log(app)
+//home page:
+app.get("/", (req, res) => {
+    res.end('Home Page!!')
+})
+
+//start server
+app.listen(3000, () => {
+    console.log('Express Server is running')
+})
+
+if you build app, you have to switch very often from source code to runtime
+
+how to enable hot reloading feature.
+
+There is a module "nodemon"
+
+Steps:
+
+npm install -g nodemon
+
+nodemon src/index.js
+[nodemon] 2.0.19
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: js,mjs,json
+[nodemon] starting `node src/index.js`
+Express Server is running
+[nodemon] restarting due to changes...
+[nodemon] starting `node src/index.js`
+Express Server is running
+[nodemon] restarting due to changes...
+[nodemon] starting `node src/index.js`
+..........................................................................
+			   REST API development
+....................................................................................
+
+HTTP Verbs:
+  -GET
+  -POST
+  -PUT
+  -DELETE
+
+Resource:
+ -UserResource
+ -ProductResource
+ -CustomerResource
+ 
+
+const express = require('express')
+
+// console.log(express)
+const app = express()
+
+// console.log(app)
+//home page:
+app.get("/", (req, res) => {
+    res.end('Welcome to Express App - Home Page!!!')
+})
+//REST API:
+app.get('/api/customers',(req,res)=>{
+    res.end('Customers-Get')
+})
+app.post('/api/customers/create',(req,res)=>{
+    res.end('Customers-POST')
+})
+app.put('/api/customers/update',(req,res)=>{
+    res.end('Customers-UPDATE')
+})
+app.delete('/api/customers/remove',(req,res)=>{
+    res.end('Customers-Delete')
+})
+app.get('/api/users',(req,res)=>{
+    res.end('users-Get')
+})
+app.post('/api/users/create',(req,res)=>{
+    res.end('USERS-POST')
+})
+app.put('/api/users/update',(req,res)=>{
+    res.end('USERS-UPDATE')
+})
+app.delete('/api/users/remove',(req,res)=>{
+    res.end('USERS-Delete')
+})
+
+//start server
+app.listen(3000, () => {
+    console.log('Express Server is running')
+})
+.....................................................................................
+			 How to modularize the express app
+.....................................................................................
+
+
+						    |-----Customers
+						    |-----Users
+User - /api/customers/-------|Express Server|App-----
+						    |-----Products
+						    |-----XXX
+
+src
+  |
+  index.js - root app
+routers
+  |
+  ----customerrouter.js
+services
+  ----customerService.js
+
+
+Router:
+  A router object is isloated instance of middlewares and routes.
+  You can think of it as a "mini application"
+
+router.get
+router.post
+router.delete
+router.put
+
+eg:
+ src/routers/customer.router.js
+const express = require('express')
+const customerRouter = express.Router()
+
+customerRouter.get('/', (req, res) => {
+    res.end('Customers-Get!!!')
+})
+customerRouter.post('/create', (req, res) => {
+    res.end('Customers-POST')
+})
+customerRouter.put('/update', (req, res) => {
+    res.end('Customers-UPDATE')
+})
+customerRouter.delete('/remove', (req, res) => {
+    res.end('Customers-Delete')
+})
+//
+module.exports = customerRouter;
+
+How to create Router Object?
+   The top level Express api to create router object.
+
+const express =require('express')
+const router = express.Router()
+
+
+const express = require('express')
+const customerRouter = require('./routers/customer.router')
+
+const app = express()
+
+//connecting router with application object, so that routing will happen.
+app.use('/api/customers',customerRouter);
+
+//home page:
+app.get("/", (req, res) => {
+    res.end('Welcome to Express App - Home Page!!!')
+})
+
+//start server
+app.listen(3000, () => {
+    console.log('Express Server is running')
+})
+
+Task:
+ You have to complete this customer end point with CURD operation using ARRAY.
+you have to use array as database.
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
