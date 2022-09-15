@@ -2080,23 +2080,629 @@ Task:
  You have to complete this customer end point with CURD operation using ARRAY.
 you have to use array as database.
 
+How to read Parameters in express?
+
+parameters :
+  path parameter
+    /customers/:id
+
+req.params
+
+  query parameter
+   /customers?sort=asc
+
+req.query  
+
+
+const express = require('express')
+const customerRouter = express.Router()
+
+customerRouter.get('/', (req, res) => {
+    res.end('Customers-Get!!!')
+})
+customerRouter.get('/:id', (req, res) => {
+    const params = req.params
+    console.log(params)
+    res.end('Customers-Get!!!' + params.id)
+})
+customerRouter.get('/search/bycity', (req, res) => {
+    const params = req.query
+    console.log(params)
+    res.end('Customers-search!!!')
+})
+
+
+customerRouter.post('/create', (req, res) => {
+    res.end('Customers-POST')
+})
+
+
+customerRouter.put('/update/:id', (req, res) => {
+    const params = req.params
+    console.log(params)
+    res.end('Customers-UPDATE')
+})
+customerRouter.delete('/remove/:id', (req, res) => {
+      res.end('Customers-Delete')
+})
+//
+module.exports = customerRouter;
+.....................................................................................
+				Express Middlwares
+....................................................................................
+
+Middlewares:
+ What is Middleware?
+  Middleware is javascript function that have access request object and response and next function in the application request response cycle.
   
+ The difference between normal function which handles req and response with express , express takes thrird arg
+
+ normal function
+  app.get('url',(req,res)=>{})
+
+ Middleware function
+  app.get('url',(req,res,next)=>{
+
+  })
+ req and res are objects
+ next is a function
+
+The next function is a function in the express router which,when invoked,executes the middleware succeeding the current middleware.
+
+Tasks are middleware is doing:
+
+1.Execute any code
+2.Make changes to request and response object before handling real req and res cycle.
+3.Middlwares can be attached on application object and also router object
+
+simple middleware.
+
+const express = require('express')
+
+const app = express();
+
+//simple middleware
+app.get('/', (req, res, next) => {
+    console.log('middlware')
+    next()
+})
+app.get('/', (req, res, next) => {
+    res.end('response')
+})
+
+app.listen(8080, () => {
+    console.log('Express server is running')
+})
+....................................................................................
+
+Middlwares with some logic:
+const express = require('express')
+
+const app = express();
+
+//you can intercept req do something
+app.get('/', (req, res, next) => {
+    console.log(req.url)
+    console.log(req.headers)
+    console.log(req.baseUrl)
+    //set custom response header
+    res.set({
+        'company':'IBM'
+    })
+    next()
+})
+app.get('/', (req, res, next) => {
+    res.end('response')
+})
+
+app.listen(8080, () => {
+    console.log('Express server is running')
+})
+..................................................................................
+		How to calculate the request has spend time in the 
+		     request response cycle
 
 
+const express = require('express')
+
+const app = express();
+
+//This is middlware is executed for every request irrespect of url and method
+const requestTime = (req, res, next) => {
+    req.requestTime = Date.now()
+    next()
+}
+//how to attach this middlware 
+app.use(requestTime)
+
+app.get('/', (req, res, next) => {
+    let responseText = '<h1>Hello World</h1>'
+    responseText += `Requested at ${req.requestTime}`
+    res.send(responseText)
+})
+
+app.listen(8080, () => {
+    console.log('Express server is running')
+})
+.....................................................................................
+		  Can we pass parameters to the Middleware so that we can 
+			configure middleware - Configurable Middlewares
+....................................................................................
+
+src/middlwares/my-middlware.js
+
+//custom middleware
+module.exports = function (options) {
+    //return middleware function
+    return function (req, res, next) {
+        console.log(options)
+        next();
+    }
+}
+
+index.js
+
+const express = require('express')
+
+const app = express();
+const myMiddleware = require('./middlwares/my-middleware')
+
+//configure the middleware 
+app.use(myMiddleware({option1:'option1',option2:'options'}))
 
 
+app.get('/', (req, res, next) => {
+    res.send('Configurable middleware')
+})
+
+app.listen(8080, () => {
+    console.log('Express server is running')
+})
+.....................................................................................
+				Types of Middlewares
+.....................................................................................
+1.Application middleware
+2.Router level middlware
+3.Error handling middleware
+4.Third party middleware
 
 
+1.Application middleware:
+  Middleware is attached on application object
+
+const express = require('express')
+
+const app = express();
+const myMiddleware = require('./middlwares/my-middleware')
+
+//configure the middleware 
+app.use(myMiddleware({ id: 1, name: 'subramanian' }))
+//global middleware is called for any request with any method
+app.use((req, res, next) => {
+    console.log('m2')
+    next()
+})
+app.use((req, res, next) => {
+    console.log('m3')
+    next()
+})
+app.use((req, res, next) => {
+    console.log('m4')
+    next()
+})
 
 
+app.get('/', (req, res, next) => {
+    res.send('Configurable middleware')
+})
+//url specific middleware
+// app.get('/api/user', (req, res, next) => {
+//     console.log('User Middleware')
+//     next()
+// })
+// app.get('/api/user', (req, res, next) => {
+//     res.send('user')
+// })
+//chaining middlwares and work flow with simple syntax
+app.get('/api/user', (req, res, next) => {
+    console.log('User Middleware-1')
+    next()
+}, (req, res, next) => {
+    console.log('User Middleware2')
+    next()
+}, (req, res) => {
+    res.send('Users')
+})
+app.listen(8080, () => {
+    console.log('Express server is running')
+})
+.....................................................................................
+			 Router Level Middleware
+
+Router middleware are attached at router instance level.
+
+const router =express.Router()
+
+//router global
+router.use((req,res,next)=>{
+
+}))
+router.use('/:id',((req,res,next)=>{
+
+}))
+
+eg:
+const express = require('express')
+const customerRouter = express.Router()
+
+customerRouter.use((req, res, next) => {
+    console.log('Customer Router Middleware')
+    next()
+})
+
+customerRouter.get('/', (req, res) => {
+    res.end('Customers-Get!!!')
+})
+customerRouter.get('/:id', (req, res) => {
+    const params = req.params
+    console.log(params)
+    res.end('Customers-Get!!!' + params.id)
+})
+customerRouter.get('/search/bycity', (req, res) => {
+    const params = req.query
+    console.log(params)
+    res.end('Customers-search!!!')
+})
 
 
+customerRouter.post('/create', (req, res) => {
+    res.end('Customers-POST')
+})
 
 
+customerRouter.put('/update/:id', (req, res) => {
+    const params = req.params
+    console.log(params)
+    res.end('Customers-UPDATE')
+})
+customerRouter.delete('/remove/:id', (req, res) => {
+    res.end('Customers-Delete')
+})
+//
+module.exports = customerRouter;
+
+const express = require('express')
+const customerRouter = require('./routers/customer.router')
+
+const app = express()
+
+//connecting router with application object, so that routing will happen.
+app.use('/api/customers',customerRouter);
+
+//home page:
+app.get("/", (req, res) => {
+    res.end('Welcome to Express App - Home Page!!!')
+})
+
+//start server
+app.listen(3000, () => {
+    console.log('Express Server is running')
+})
+....................................................................................
+			Error Handling middleware
+...................................................................................
+
+Error handling middleware takes four args instead of three arg.
+
+app.use((err, req, res, next)=> {
+    res.status(500).send('something went wrong')
+})
+
+const express = require('express')
+const customerRouter = require('./routers/customer.router')
+
+const app = express()
+
+//connecting router with application object, so that routing will happen.
+app.use('/api/customers', customerRouter);
+
+app.use((err, req, res, next)=> {
+    res.status(500).send('something went wrong')
+})
 
 
+//home page:
+app.get("/", (req, res) => {
+    res.end('Welcome to Express App - Home Page!!!')
+})
+
+app.get('/error',(req, res) => {
+    throw new Error('Broken...')
+})
+
+//start server
+app.listen(3000, () => {
+    console.log('Express Server is running')
+})
+...................................................................................
+			Built in and third party middlewares
+...................................................................................
+Built in middleware or third party middlewares
+
+Middlewares are supplied as part of the express team, open source community.
 
 
+in order to parse the incoming payload into javascript object.
+
+Middleware
+1.body-parser
+
+ npm install body-parser
+
+
+2.configure the middleware in app object.
+
+const express = require('express')
+const customerRouter = require('./routers/customer.router')
+const bodyParser = require('body-parser')
+
+const app = express()
+
+//register middlewares
+app.use(bodyParser.json())
+.....................................................................................
+
+How to introduce loggers in the application?
+
+$ npm install morgan
+
+
+const express = require('express')
+const customerRouter = express.Router()
+
+//customer data 
+const customers = [{
+    id: 1,
+    name: 'A1'
+},
+{
+    id: 2,
+    name: 'A2'
+},
+{
+    id: 1,
+    name: 'A3'
+}
+]
+
+
+customerRouter.use((req, res, next) => {
+    console.log('Customer Router Middleware')
+    next()
+})
+
+customerRouter.get('/', (req, res) => {
+    //return
+    res.status(200).json(customers)
+})
+customerRouter.get('/:id', (req, res) => {
+    const params = req.params
+    console.log(params)
+    res.end('Customers-Get!!!' + params.id)
+})
+customerRouter.get('/search/bycity', (req, res) => {
+    const params = req.query
+    console.log(params)
+    res.end('Customers-search!!!')
+})
+
+
+customerRouter.post('/create', (req, res) => {
+    //read payload 
+    const customer = req.body ; //read payload 
+    console.log(customer)
+    res.status(201).json({status:'Created'})
+})
+
+
+customerRouter.put('/update/:id', (req, res) => {
+    const params = req.params
+    console.log(params)
+    res.end('Customers-UPDATE')
+})
+customerRouter.delete('/remove/:id', (req, res) => {
+    res.end('Customers-Delete')
+})
+//
+module.exports = customerRouter;
+.....................................................................................
+			Advanced Middlewares
+
+1.Database Integration
+http://expressjs.com/en/guide/database-integration.html
+
+Mongodb - Demo
+
+Req:
+ Basics of mongodb knowledge
+ Mongodb must have been installed.
+	
+
+Steps:
+
+1.install mongodb database - either local or cloud or through docker.
+
+2.npm install mongodb
+
+3.database initalization.
+
+db.js
+
+const { MongoClient } = require("mongodb");
+
+//connection string:
+const connectionString = "mongodb://localhost:27017/demo";//process.env.ATLAS_URI;
+
+//create connection
+const client = new MongoClient(connectionString, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+let _db;
+
+//i want to share connection object to the application
+module.exports = {
+    connectToServer: function (callback) {
+        client.connect(function (err, db) {
+            // Verify we got a good "db" object
+            if (db) {
+                _db = db.db("employees");
+                console.log("Successfully connected to MongoDB.");
+            }
+            return callback(err);
+        });
+    },
+
+    getDb: function () {
+        return _db;
+    },
+}
+
+router:
+const express = require("express");
+
+// recordRoutes is an instance of the express router.
+// We use it to define our routes.
+// The router will be added as a middleware and will take control of requests starting with path /record.
+const recordRoutes = express.Router();
+
+// This will help us connect to the database
+const dbo = require("../db");
+
+// This help convert the id from string to ObjectId for the _id.
+const ObjectId = require("mongodb").ObjectId;
+
+
+// This section will help you get a list of all the records.
+recordRoutes.route("/list").get(function (req, res) {
+  let db_connect = dbo.getDb("records");
+  console.log('database prop =>',db_connect)
+  db_connect
+    .collection("records")
+    .find({})
+    .toArray(function (err, result) {
+      if (err) throw err;
+      res.json(result);
+    });
+});
+
+// This section will help you get a single record by id
+recordRoutes.route("/list/:id").get(function (req, res) {
+  let db_connect = dbo.getDb();
+  let myquery = { _id: ObjectId(req.params.id) };
+  db_connect
+    .collection("records")
+    .findOne(myquery, function (err, result) {
+      if (err) throw err;
+      res.json(result);
+    });
+});
+
+// This section will help you create a new record.
+recordRoutes.route("/add").post(function (req, response) {
+  let db_connect = dbo.getDb();
+  let myobj = {
+    name: req.body.name,
+    position: req.body.position,
+    level: req.body.level,
+  };
+  db_connect.collection("records").insertOne(myobj, function (err, res) {
+    if (err) throw err;
+    response.json(res);
+  });
+});
+
+// This section will help you update a record by id.
+recordRoutes.route("/update/:id").post(function (req, response) {
+  let db_connect = dbo.getDb();
+  let myquery = { _id: ObjectId(req.params.id) };
+  let newvalues = {
+    $set: {
+      name: req.body.name,
+      position: req.body.position,
+      level: req.body.level,
+    },
+  };
+  db_connect
+    .collection("records")
+    .updateOne(myquery, newvalues, function (err, res) {
+      if (err) throw err;
+      console.log("1 document updated");
+      response.json(res);
+    });
+});
+
+// This section will help you delete a record
+recordRoutes.route("/:id").delete((req, response) => {
+  let db_connect = dbo.getDb();
+  let myquery = { _id: ObjectId(req.params.id) };
+  db_connect.collection("records").deleteOne(myquery, function (err, obj) {
+    if (err) throw err;
+    console.log("1 document deleted");
+    response.json(obj);
+  });
+});
+
+module.exports = recordRoutes;
+
+main
+index.js
+const express = require('express')
+const customerRouter = require('./routers/customer.router')
+const bodyParser = require('body-parser')
+const morgan = require('morgan')
+const fs = require('fs')
+const path = require('path')
+const employeeRouter = require('./routers/employee.router')
+// get driver connection
+const dbo = require("./db");
+
+const app = express()
+
+//register middlewares
+app.use(bodyParser.json())
+//logger
+// create a write stream (in append mode)
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
+
+// setup the logger
+app.use(morgan('combined', { stream: accessLogStream }))
+
+//connecting router with application object, so that routing will happen.
+app.use('/api/customers', customerRouter);
+app.use('/api/employees', employeeRouter)
+
+// app.use((err, req, res, next) => {
+//     res.status(500).send('something went wrong')
+// })
+
+
+//home page:
+app.get("/", (req, res) => {
+    res.end('Welcome to Express App - Home Page!!!')
+})
+
+//start server
+app.listen(3000, () => {
+    // perform a database connection when server starts
+    dbo.connectToServer(function (err) {
+        if (err) console.error(err);
+    });
+    console.log(`Server is running on port: ${3000}`);
+});
+.....................................................................................
+			Debugging Node.js app in Vs code
+.....................................................................................
 
 
 
